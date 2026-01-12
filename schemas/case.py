@@ -27,6 +27,9 @@ class CaseReportUpdate(BaseModel):
     best_time_to_visit: Optional[str] = None
     status: Optional[str] = None
 
+class CaseReportStatusUpdate(BaseModel):
+    status: str
+
 class CaseReportResponse(BaseModel):
     case_id: int
     volunt_id: int
@@ -43,6 +46,23 @@ class CaseReportResponse(BaseModel):
     status: str
     reported_at: datetime
     model_config = {"from_attributes": True}
+
+class CaseReportDetailedResponse(CaseReportResponse):
+    volunteer_name: str
+    ngo_name: Optional[str] = None
+    location: str
+
+class CaseReportConciseResponse(BaseModel):
+    case_id: int
+    ngo_name: Optional[str] = None
+    volunteer_name: str
+    number_of_dogs: int
+    location: str
+    description: Optional[str] = None
+    status: str
+
+class CaseReportAccept(BaseModel):
+    ngo_id: int
 
 
 

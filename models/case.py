@@ -17,8 +17,10 @@ class CaseReport(Base):
     description = Column(Text, nullable=True)
     best_time_to_visit = Column(String, nullable=True)
     status = Column(String, default="Submitted")
+    ngo_id = Column(Integer, ForeignKey("ngo_partners.ngo_id"), nullable=True)
     reported_at = Column(
         TIMESTAMP(timezone=True),
         server_default=func.now()
     )
     volunteer = relationship("Volunt", back_populates="case_reports")
+    ngo = relationship("NGOPartner")
