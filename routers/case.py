@@ -7,6 +7,10 @@ from dependencies import get_db
 
 router = APIRouter(prefix="/case-reports", tags=["Case Reports"])
 
+@router.get("/")
+def get_all_case(db:Session=Depends(get_db)):
+    return db.query(CaseReport).all()
+
 @router.post("/", response_model=CaseReportResponse)
 def create_case_report(
     case: CaseReportCreate,

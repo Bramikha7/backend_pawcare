@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from dependencies import get_db
+from sqlalchemy import func
 from models.volunt import Volunt
-from schemas.volunt import VolunteerCreate, VolunteerUpdate, VolunteerLogin, VolunteerResponse
+from schemas.volunt import VolunteerCreate, VolunteerLogin, VolunteerResponse,VolunteerCountResponse
 router = APIRouter(prefix="/volunteers", tags=["Volunteers"])
 
 
@@ -29,6 +30,11 @@ def volunteer_signin(credentials: VolunteerLogin, db: Session = Depends(get_db))
         raise HTTPException(status_code=401, detail="Invalid credentials")
     return {"message": "Signed in successfully", "volunt_id": volunteer.volunt_id}
 
+@router.get("/count",response_model=VolunteerCountResponse)
+def get_volunteer_count(db:Session=Depends(get_db)):
+    total_volunteers=db.query(func.count(Volunt.volunt_id)).scalar()
+    return{"total_volunteers":total_volunteers}
+
 @router.get("/", response_model=list[VolunteerResponse])
 def get_all_volunteers(db: Session = Depends(get_db)):
     return db.query(Volunt).all()
@@ -38,18 +44,6 @@ def get_volunteer(volunt_id: int, db: Session = Depends(get_db)):
     volunteer = db.query(Volunt).filter(Volunt.volunt_id == volunt_id).first()
     if not volunteer:
         raise HTTPException(status_code=404, detail="Volunteer not found")
-    return volunteer
-
-@router.put("/{volunt_id}", response_model=VolunteerResponse)
-def update_volunteer(volunt_id: int, update_data: VolunteerUpdate, db: Session = Depends(get_db)):
-    volunteer = db.query(Volunt).filter(Volunt.volunt_id == volunt_id).first()
-    if not volunteer:
-        raise HTTPException(status_code=404, detail="Volunteer not found")
-    update_dict = update_data.model_dump(exclude_unset=True)
-    for field, value in update_dict.items():
-        setattr(volunteer, field, value)
-    db.commit()
-    db.refresh(volunteer)
     return volunteer
 
 @router.delete("/{volunt_id}")

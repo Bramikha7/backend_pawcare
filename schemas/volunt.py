@@ -27,6 +27,9 @@ class VolunteerResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class VolunteerCountResponse(BaseModel):
+    total_volunteers: int        
+
 
 
 

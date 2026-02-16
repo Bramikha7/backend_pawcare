@@ -36,7 +36,8 @@ class NGOPartnerResponse(BaseModel):
     class Config:
         from_attributes = True
 
-
+class NGOPartnerCountResponse(BaseModel):
+    total_ngo:int
 
 
 

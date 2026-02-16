@@ -1,17 +1,20 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from dependencies import get_db
 from models.ngo import NGOPartner
 from schemas.ngo import (
     NGOPartnerCreate,
-    NGOPartnerUpdate,
-    NGOPartnerLogin
+    NGOPartnerLogin,NGOPartnerCountResponse
 )
 router = APIRouter(
     prefix="/ngo-partners",
     tags=["NGO Partners"]
 )
-
+@router.get("/count",response_model=NGOPartnerCountResponse)
+def get_ngo_count(db:Session=Depends(get_db)):
+    total_ngo=db.query(func.count(NGOPartner.ngo_id)).scalar()
+    return{"total_ngo":total_ngo}
 @router.get("/")
 def get_all_ngos(db: Session = Depends(get_db)):
     return db.query(NGOPartner).all()
@@ -80,29 +83,6 @@ def get_ngo_by_id(
             detail="NGO not found"
         )
     return ngo
-
-@router.put("/{ngo_id}")
-def update_ngo(
-    ngo_id: int,
-    ngo_data: NGOPartnerUpdate,
-    db: Session = Depends(get_db)
-):
-    ngo = db.query(NGOPartner).filter(
-        NGOPartner.ngo_id == ngo_id
-    ).first()
-    if not ngo:
-        raise HTTPException(
-            status_code=404,
-            detail="NGO not found"
-        )
-    for key, value in ngo_data.dict(exclude_unset=True).items():
-        setattr(ngo, key, value)
-    db.commit()
-    db.refresh(ngo)
-    return {
-        "message": "NGO updated successfully",
-        "ngo": ngo
-    }
 
 @router.delete("/{ngo_id}")
 def delete_ngo(
